@@ -334,32 +334,31 @@ namespace cakeslice
                     scalingFactor = Screen.height / 360.0f;
                 }
 
-                // If scaling is too small (height less than 360 pixels), make sure you still render the outlines, but render them with 1 thickness
-                if (scaleWithScreenSize && scalingFactor < 1)
+                if (UnityEngine.XR.XRSettings.isDeviceActive && sourceCamera.stereoTargetEye != StereoTargetEyeMask.None)
                 {
-                    /* if(VRSettings.isDeviceActive && sourceCamera.stereoTargetEye != StereoTargetEyeMask.None)
-                    {
-                        outlineShaderMaterial.SetFloat("_LineThicknessX", (1 / 1000.0f) * (1.0f / VRSettings.eyeTextureWidth) * 1000.0f);
-                        outlineShaderMaterial.SetFloat("_LineThicknessY", (1 / 1000.0f) * (1.0f / VRSettings.eyeTextureHeight) * 1000.0f);
-                    }
-                    else
-                    { */
-                    outlineShaderMaterial.SetFloat("_LineThicknessX", (1 / 1000.0f) * (1.0f / Screen.width) * 1000.0f);
-                    outlineShaderMaterial.SetFloat("_LineThicknessY", (1 / 1000.0f) * (1.0f / Screen.height) * 1000.0f);
-                    //}
+                    // Angle based thickness calculation for VR. thickness=1 means 0.1 degree in view.
+                    float lineThicknessDegree = lineThickness * 0.1f;
+                    float degreeToUV = (1.0f / sourceCamera.fieldOfView);
+                    outlineShaderMaterial.SetFloat("_LineThicknessX", lineThicknessDegree * degreeToUV);
+                    outlineShaderMaterial.SetFloat("_LineThicknessY", lineThicknessDegree * degreeToUV);
                 }
                 else
                 {
-                    /*  if(VRSettings.isDeviceActive && sourceCamera.stereoTargetEye != StereoTargetEyeMask.None)
-                     {
-                         outlineShaderMaterial.SetFloat("_LineThicknessX", scalingFactor * (lineThickness / 1000.0f) * (1.0f / VRSettings.eyeTextureWidth) * 1000.0f);
-                         outlineShaderMaterial.SetFloat("_LineThicknessY", scalingFactor * (lineThickness / 1000.0f) * (1.0f / VRSettings.eyeTextureHeight) * 1000.0f);
-                     }
-                     else
-                     { */
-                    outlineShaderMaterial.SetFloat("_LineThicknessX", scalingFactor * (lineThickness / 1000.0f) * (1.0f / Screen.width) * 1000.0f);
-                    outlineShaderMaterial.SetFloat("_LineThicknessY", scalingFactor * (lineThickness / 1000.0f) * (1.0f / Screen.height) * 1000.0f);
-                    //}
+                    // If scaling is too small (height less than 360 pixels), make sure you still render the outlines, but render them with 1 thickness
+                    if (scaleWithScreenSize && scalingFactor < 1)
+                    {
+                        outlineShaderMaterial.SetFloat("_LineThicknessX",
+                            (1 / 1000.0f) * (1.0f / Screen.width) * 1000.0f);
+                        outlineShaderMaterial.SetFloat("_LineThicknessY",
+                            (1 / 1000.0f) * (1.0f / Screen.height) * 1000.0f);
+                    }
+                    else
+                    {
+                        outlineShaderMaterial.SetFloat("_LineThicknessX",
+                            scalingFactor * (lineThickness / 1000.0f) * (1.0f / Screen.width) * 1000.0f);
+                        outlineShaderMaterial.SetFloat("_LineThicknessY",
+                            scalingFactor * (lineThickness / 1000.0f) * (1.0f / Screen.height) * 1000.0f);
+                    }
                 }
                 outlineShaderMaterial.SetFloat("_LineIntensity", lineIntensity);
                 outlineShaderMaterial.SetFloat("_FillAmount", fillAmount);
